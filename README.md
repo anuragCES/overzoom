@@ -14,5 +14,6 @@ $ npm i -g expo-cli
 $ expo start
 $ i
 ```
+and head to the settings link on the app.
 
 You must have xCode properly installed.
