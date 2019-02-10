@@ -1,0 +1,141 @@
+// import React from 'react';
+// import { ExpoConfigView } from '@expo/samples';
+
+// export default class SettingsScreen extends React.Component {
+//   static navigationOptions = {
+//     title: 'app.json',
+//   };
+
+//   render() {
+//     /* Go ahead and delete ExpoConfigView and replace it with your
+//      * content, we just wanted to give you a quick view of your config */
+//     return <ExpoConfigView />;
+//   }
+// }
+
+import React from 'react';
+import {StyleSheet, View, Text, Dimensions} from 'react-native';
+import geoViewport from 'geo-viewport';
+
+import MapView, {MAP_TYPES, PROVIDER_DEFAULT, ProviderPropType, UrlTile} from 'react-native-maps';
+
+const {width, height} = Dimensions.get('window');
+var debug = require('debug')('OverZoom');
+
+const ASPECT_RATIO = width / height;
+const LATITUDE = 37.78825;
+const LONGITUDE = -122.4324;
+const LATITUDE_DELTA = 0.0922;
+const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
+
+class CustomTiles extends React.Component {
+  constructor(props, context) {
+    super(props, context);
+
+    this.state = {
+      region: {
+        latitude: LATITUDE,
+        longitude: LONGITUDE,
+        latitudeDelta: LATITUDE_DELTA,
+        longitudeDelta: LONGITUDE_DELTA
+      }
+    };
+  }
+
+  get mapType() {
+    // MapKit does not support 'none' as a base map
+    return this.props.provider === PROVIDER_DEFAULT
+      ? MAP_TYPES.STANDARD
+      : MAP_TYPES.NONE;
+  }
+  
+  handleRegionChange = region => {
+    const { width, height } = Dimensions.get('window');
+    let { latitude, latitudeDelta, longitude, longitudeDelta } = region;
+
+    let bounds = geoViewport.viewport([
+      longitude - longitudeDelta, // lng => west
+      latitude - latitudeDelta, // lat => south
+      longitude, // lng  => east
+      latitude, // lat => north
+    ], [width, height]);
+
+    let { zoom } = bounds;
+
+    this.setState({ zoom }, () => {
+      debug('currentZoom', zoom);
+    });
+  }
+
+  render() {
+    const { region, zoom } = this.state;
+
+    return (
+      <View style={styles.container}>
+        <MapView
+          provider={this.props.provider}
+          mapType={this.mapType}
+          style={styles.map}
+          initialRegion={region}
+          onRegionChangeComplete={(region) => this.handleRegionChange(region)}
+          >
+          <UrlTile
+            urlTemplate="http://c.tile.stamen.com/watercolor/{z}/{x}/{y}.jpg"
+            zIndex={-1}/>
+        </MapView>
+        <View style={styles.buttonContainer}>
+          <View style={styles.bubble}>
+            <Text>Custom Tiles - z: {zoom}</Text>
+          </View>
+        </View>
+      </View>
+    );
+  }
+}
+
+CustomTiles.propTypes = {
+  provider: ProviderPropType
+};
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'flex-end',
+    alignItems: 'center'
+  },
+  map: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0
+  },
+  bubble: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 20
+  },
+  latlng: {
+    width: 200,
+    alignItems: 'stretch'
+  },
+  button: {
+    width: 80,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    marginHorizontal: 10
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    marginVertical: 20,
+    backgroundColor: 'transparent'
+  }
+});
+
+export default CustomTiles;
