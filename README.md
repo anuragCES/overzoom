@@ -17,3 +17,6 @@ $ i
 and head to the settings link on the app.
 
 You must have xCode properly installed.
+
+Then download Charles proxy (https://www.charlesproxy.com/)
+and observe how tiles are requested.
