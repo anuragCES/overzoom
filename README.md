@@ -8,9 +8,11 @@ So if you are on zoom 20, rather than requesting tiles z20, will request tiles z
 This repo basically recreates that issue.
 Just clone the project
 
-```$ npm i
+```
+$ npm i
 $ npm i -g expo-cli
 $ expo start
-$ i```
+$ i
+```
 
 You must have xCode properly installed.
