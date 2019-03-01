@@ -17,7 +17,7 @@ import React from 'react';
 import {StyleSheet, View, Text, Dimensions} from 'react-native';
 import geoViewport from 'geo-viewport';
 
-import MapView, {MAP_TYPES, PROVIDER_DEFAULT, ProviderPropType, UrlTile} from 'react-native-maps';
+import MapView, {MAP_TYPES, PROVIDER_DEFAULT, ProviderPropType, UrlTile, PROVIDER_GOOGLE, LocalTile} from 'react-native-maps';
 
 const {width, height} = Dimensions.get('window');
 var debug = require('debug')('OverZoom');
@@ -37,8 +37,10 @@ class CustomTiles extends React.Component {
         latitude: LATITUDE,
         longitude: LONGITUDE,
         latitudeDelta: LATITUDE_DELTA,
-        longitudeDelta: LONGITUDE_DELTA
-      }
+        longitudeDelta: LONGITUDE_DELTA,
+          url:''
+      },
+        zoom:13
     };
   }
 
@@ -48,7 +50,7 @@ class CustomTiles extends React.Component {
       ? MAP_TYPES.STANDARD
       : MAP_TYPES.NONE;
   }
-  
+
   handleRegionChange = region => {
     const { width, height } = Dimensions.get('window');
     let { latitude, latitudeDelta, longitude, longitudeDelta } = region;
@@ -63,13 +65,12 @@ class CustomTiles extends React.Component {
     let { zoom } = bounds;
 
     this.setState({ zoom }, () => {
-      debug('currentZoom', zoom);
+      console.log('LOGGING::CurrentZoom Level:: ', zoom);
     });
   }
 
   render() {
     const { region, zoom } = this.state;
-
     return (
       <View style={styles.container}>
         <MapView
@@ -77,11 +78,12 @@ class CustomTiles extends React.Component {
           mapType={this.mapType}
           style={styles.map}
           initialRegion={region}
-          onRegionChangeComplete={(region) => this.handleRegionChange(region)}
+          onRegionChangeComplete={(region) => this.handleRegionChange(region)} maxZoomLevel={20}
           >
-          <UrlTile
-            urlTemplate="http://c.tile.stamen.com/watercolor/{z}/{x}/{y}.jpg"
-            zIndex={-1}/>
+            <UrlTile
+              urlTemplate={"http://c.tile.stamen.com/watercolor/{z}/{x}/{y}.jpg"}
+              zIndex={-1} maximumZ={20}
+            />
         </MapView>
         <View style={styles.buttonContainer}>
           <View style={styles.bubble}>
@@ -96,6 +98,11 @@ class CustomTiles extends React.Component {
 CustomTiles.propTypes = {
   provider: ProviderPropType
 };
+
+CustomTiles.defaultProps = {
+  provider:PROVIDER_GOOGLE
+};
+
 
 const styles = StyleSheet.create({
   container: {
